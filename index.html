@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#263746">
+  <title>Lero-Lero do Síndico</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #263746;
+      --muted: #667482;
+      --paper: #f4f1e9;
+      --card: #fffefa;
+      --accent: #c47a42;
+      --line: #e6e0d5;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 28px 16px;
+      background:
+        radial-gradient(circle at 12% 10%, #e7dcc8 0, transparent 32%),
+        radial-gradient(circle at 90% 85%, #dce4e3 0, transparent 30%),
+        var(--paper);
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+    }
+    main {
+      width: min(100%, 720px);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 18px 55px #26374618;
+    }
+    header {
+      text-align: center;
+      padding: 34px 24px 28px;
+      color: #fff;
+      background: var(--ink);
+      border-bottom: 5px solid var(--accent);
+    }
+    .building { font-size: 34px; margin-bottom: 8px; }
+    h1 {
+      margin: 0;
+      font-size: clamp(27px, 6vw, 42px);
+      letter-spacing: .045em;
+      line-height: 1.05;
+    }
+    .subtitle {
+      margin: 12px 0 0;
+      color: #d7e0e6;
+      font: 14px/1.5 Arial, sans-serif;
+    }
+    .content { padding: 30px clamp(20px, 5vw, 42px) 34px; }
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--accent);
+      font: bold 11px Arial, sans-serif;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    .paper {
+      position: relative;
+      min-height: 220px;
+      padding: 27px 25px;
+      background: #fbf8f0;
+      border: 1px solid #e9e1d2;
+      border-radius: 10px;
+    }
+    .paper::before {
+      content: "COMUNICADO OFICIAL";
+      display: block;
+      margin-bottom: 19px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e5ddcf;
+      color: #78818a;
+      font: bold 10px Arial, sans-serif;
+      letter-spacing: .16em;
+    }
+    #phrase {
+      margin: 0;
+      font-size: clamp(17px, 2.8vw, 21px);
+      line-height: 1.7;
+      white-space: normal;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 8px;
+      padding: 13px 18px;
+      cursor: pointer;
+      font: bold 14px Arial, sans-serif;
+      transition: transform .15s ease, background .15s ease;
+    }
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+    .generate { flex: 1 1 190px; color: white; background: var(--ink); }
+    .generate:hover { background: #344c60; }
+    .copy { flex: 0 1 auto; color: var(--ink); background: #eee8dc; }
+    .copy:hover { background: #e4dccd; }
+    #status {
+      min-height: 18px;
+      margin: 12px 0 0;
+      color: var(--muted);
+      font: 12px Arial, sans-serif;
+      text-align: center;
+    }
+    footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font: 12px Arial, sans-serif;
+      text-align: center;
+    }
+    @media (max-width: 420px) {
+      .content { padding-top: 24px; }
+      .paper { padding: 22px 18px; }
+      .copy { flex: 1 1 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="building" aria-hidden="true">🏢</div>
+      <h1>LERO-LERO<br>DO SÍNDICO</h1>
+      <p class="subtitle">A comunicação oficial que não comunica absolutamente nada.</p>
+    </header>
+
+    <section class="content" aria-live="polite">
+      <p class="eyebrow">Central de comunicados condominiais</p>
+      <div class="paper">
+        <p id="phrase">Preparando comunicado...</p>
+      </div>
+      <div class="actions">
+        <button class="generate" id="generate" type="button">↻ Gerar outro comunicado</button>
+        <button class="copy" id="copy" type="button">Copiar texto</button>
+      </div>
+      <p id="status" role="status">Um novo comunicado é gerado automaticamente ao abrir ou atualizar a página.</p>
+    </section>
+
+    <footer>Gestão, transparência e enrolação — sempre trabalhando por você.</footer>
+  </main>
+
+  <script>
+    const openings = [
+      "Prezados condôminos, vimos por meio deste comunicado",
+      "A administração do condomínio, no uso de suas atribuições, vem respeitosamente informar",
+      "Considerando as recentes manifestações recebidas, gostaríamos de esclarecer",
+      "Em atenção às demandas apresentadas pelos moradores, comunicamos",
+      "Após uma análise criteriosa dos fatos, cabe à administração destacar",
+      "A fim de manter a transparência e a boa convivência, informamos",
+      "A sindicância, sempre atenta às necessidades coletivas, vem esclarecer",
+      "Diante dos últimos acontecimentos nas dependências do condomínio, reforçamos"
+    ];
+
+    const subjects = [
+      "que a situação em questão está sendo devidamente acompanhada",
+      "que todas as medidas cabíveis estão sendo cuidadosamente avaliadas",
+      "que o assunto permanece em análise junto à administração",
+      "que estamos buscando a melhor solução possível para todos os envolvidos",
+      "que a demanda foi recebida e será tratada com a atenção necessária",
+      "que as providências pertinentes estão sendo encaminhadas dentro das possibilidades administrativas",
+      "que o caso exige uma avaliação conjunta de todos os aspectos envolvidos",
+      "que não estamos medindo esforços para encontrar um encaminhamento adequado",
+      "que a situação requer cautela, responsabilidade e, acima de tudo, compreensão"
+    ];
+
+    const justifications = [
+      "sempre respeitando os princípios da boa convivência condominial",
+      "levando em consideração o interesse coletivo e as particularidades de cada unidade",
+      "observando as normas internas e os procedimentos administrativos aplicáveis",
+      "sem comprometer o equilíbrio financeiro e operacional do condomínio",
+      "dentro dos limites de atuação da gestão e das possibilidades existentes",
+      "considerando que determinadas questões demandam tempo e alinhamento entre as partes",
+      "em consonância com o compromisso permanente de preservar o patrimônio comum",
+      "buscando conciliar as diferentes necessidades e expectativas dos moradores"
+    ];
+
+    const bureaucracies = [
+      "Ressaltamos que cada situação possui suas particularidades e deve ser analisada individualmente.",
+      "É importante lembrar que a colaboração de todos é fundamental para o bom andamento das atividades.",
+      "Eventuais desdobramentos serão comunicados pelos canais oficiais, tão logo haja uma definição.",
+      "Reforçamos que nenhuma decisão será tomada sem a devida consideração dos impactos envolvidos.",
+      "A administração permanece empenhada em conduzir o assunto da forma mais transparente possível.",
+      "Pedimos que sejam evitadas interpretações precipitadas até que todos os pontos sejam devidamente esclarecidos.",
+      "As tratativas seguem em andamento, respeitando os prazos e as etapas necessárias."
+    ];
+
+    const closings = [
+      "Contamos com a compreensão e colaboração de todos.",
+      "Agradecemos, desde já, a habitual compreensão dos senhores condôminos.",
+      "Seguimos à disposição para os esclarecimentos que se fizerem necessários.",
+      "Certos da compreensão de todos, reiteramos nosso compromisso com a coletividade.",
+      "Novas informações serão repassadas oportunamente, se e quando necessário.",
+      "Atenciosamente, Administração do Condomínio."
+    ];
+
+    let previous = "";
+
+    function pick(list) {
+      return list[Math.floor(Math.random() * list.length)];
+    }
+
+    function generatePhrase() {
+      let result = "";
+      // Evita repetir imediatamente o mesmo comunicado.
+      for (let attempt = 0; attempt < 12; attempt++) {
+        const parts = [
+          pick(openings) + ",",
+          pick(subjects) + ",",
+          pick(justifications) + ".",
+          pick(bureaucracies),
+          pick(closings)
+        ];
+        result = parts.join(" ");
+        if (result !== previous) break;
+      }
+      previous = result;
+      document.getElementById("phrase").textContent = result;
+      document.getElementById("status").textContent = "Comunicado oficialmente gerado. A administração agradece.";
+    }
+
+    document.getElementById("generate").addEventListener("click", generatePhrase);
+
+    document.getElementById("copy").addEventListener("click", async () => {
+      const text = document.getElementById("phrase").textContent;
+      const status = document.getElementById("status");
+      try {
+        await navigator.clipboard.writeText(text);
+        status.textContent = "Comunicado copiado. Pode encaminhar ao grupo do condomínio.";
+      } catch {
+        const area = document.createElement("textarea");
+        area.value = text;
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand("copy");
+        area.remove();
+        status.textContent = "Comunicado copiado.";
+      }
+    });
+
+    // Cada visita ou atualização da página gera um novo texto.
+    generatePhrase();
+  </script>
+</body>
+</html>
